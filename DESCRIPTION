@@ -1,10 +1,10 @@
 Package: waities
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Scraping package for bbc food website
 Version: 0.1
 Date: 2016-06-17
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Author: OJ Watson
+Maintainer: <oj.watson@hotmail.co.uk>
+Description: The BBC food website is not receiving further funding, and is being archived with no easy way to search for recipes etc. This package simply scrapes the information and will be extenxed to include markups needed to use it in a helpful fashion.
+License: GPL2
 LazyData: TRUE
