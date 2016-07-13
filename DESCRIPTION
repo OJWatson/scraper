@@ -9,7 +9,9 @@ Depends:
     R (>= 3.0.1),
 Imports:
     XML,
-    xml2
+    xml2,
+    rvest,
+    magrittr
 Description: Growing database of scraping functions
 License: GPL2
 LazyData: TRUE
