@@ -10,6 +10,7 @@
 #' @param css Minimal css selector for a table of information
 #'
 #' @importFrom rvest html_children html_nodes html_attrs html_attr html_text
+#' @importFrom magrittr %>%
 #'
 #' @export
 #'
