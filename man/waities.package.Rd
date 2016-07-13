@@ -2,9 +2,9 @@
 % Please edit documentation in R/package.R
 \name{waities.package}
 \alias{waities.package}
-\title{waities: Website scraping and curation tools for BBC food backup}
+\title{waities: Website scraping and curation tools for BBC food backup and scraping in general}
 \description{
-waities: Website scraping and curation tools for BBC food backup
+waities: Website scraping and curation tools for BBC food backup and scraping in general
 }
 \author{
 OJ Watson \email{oj.watson@hotmail.co.uk}

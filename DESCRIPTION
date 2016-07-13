@@ -5,6 +5,11 @@ Version: 0.1
 Date: 2016-06-17
 Author: OJ Watson
 Maintainer: <oj.watson@hotmail.co.uk>
+Depends:
+    R (>= 3.0.1),
+Imports:
+    XML,
+    xml2
 Description: Growing database of scraping functions
 License: GPL2
 LazyData: TRUE

@@ -10,6 +10,8 @@
 #'
 #' @return List of list of recipes
 #'
+#' @importFrom rvest html_nodes html_node html_text
+#'
 #' @export
 #'
 #'
