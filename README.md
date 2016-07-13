@@ -1,6 +1,7 @@
 # waities
 [![Build Status](https://travis-ci.org/OJWatson/waities.png?branch=master)](https://travis-ci.org/OJWatson/waities)
-*Scraping package with growing functionality*
+
+> Scraping package with growing functionality
 
 ## What is this?
 
