@@ -9,6 +9,8 @@
 #' @param url.vector Vector of urls from wayback machine archives
 #' @param css Minimal css selector for a table of information
 #'
+#' @importFrom rvest html_children html_nodes html_attrs html_attr html_text
+#'
 #' @export
 #'
 #' @return list of dataframes of scraped information
