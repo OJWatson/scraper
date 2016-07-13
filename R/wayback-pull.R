@@ -40,7 +40,7 @@ Wayback_Pull <- function(url.vector=c("https://web.archive.org/web/2015040100000
     day.node.set <- node.set[which(rvest::html_attrs(node.set)=="day")]
 
     ## create positions for url scrapes
-    href.pos <- which(unlist(lapply(html_attrs(xml2::xml_contents(day.node.set[1])),function(x){is.element("href",names(x))})))
+    href.pos <- which(unlist(lapply(rvest::html_attrs(xml2::xml_contents(day.node.set[1])),function(x){is.element("href",names(x))})))
     pos.length <- length(xml2::xml_contents(day.node.set[1]))
 
     ## cycle through xml.list to generate list of urls from which to scrape
