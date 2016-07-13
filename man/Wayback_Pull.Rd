@@ -13,6 +13,8 @@
 \item{url.vector}{Vector of urls from wayback machine archives}
 
 \item{css}{Minimal css selector for a table of information}
+
+\item{col.names}{vector of length 2 for table column names}
 }
 \value{
 list of dataframes of scraped information

@@ -8,6 +8,7 @@
 #'
 #' @param url.vector Vector of urls from wayback machine archives
 #' @param css Minimal css selector for a table of information
+#' @param col.names vector of length 2 for table column names
 #'
 #' @importFrom rvest html_children html_nodes html_attrs html_attr html_text
 #' @importFrom magrittr %>%
@@ -31,18 +32,6 @@ Wayback_Pull <- function(url.vector=c("https://web.archive.org/web/2015040100000
     ## pull the xml files from the urls
     xml.list <- lapply(url.vector, FUN = xml2::read_html)
 
-    ### First start with the first webpage
-
-    ## draw down the node set for the date captures
-    node.set <- rvest::html_nodes(xml.list[[2]],".captures") %>% rvest::html_children()
-
-    ## isolate the position in contents that will corresponds to the url
-    day.node.set <- node.set[which(rvest::html_attrs(node.set)=="day")]
-
-    ## create positions for url scrapes
-    href.pos <- which(unlist(lapply(rvest::html_attrs(xml2::xml_contents(day.node.set[1])),function(x){is.element("href",names(x))})))
-    pos.length <- length(xml2::xml_contents(day.node.set[1]))
-
     ## cycle through xml.list to generate list of urls from which to scrape
     url.list <- c()
 
@@ -52,14 +41,16 @@ Wayback_Pull <- function(url.vector=c("https://web.archive.org/web/2015040100000
       node.set <- rvest::html_nodes(xml.list[[i]],".captures") %>% rvest::html_children()
 
       ## isolate the position in contents that will corresponds to the url
-      day.node.set <- node.set[which(rvest::html_attrs(node.set)=="day")]
+      pop.node.set <- node.set[which(rvest::html_attrs(node.set)=="pop")]
 
-      ## positions in contents that correspond to href
-      pos.hrefs <- seq(href.pos, ((length(day.node.set)-1)*pos.length)+href.pos, pos.length)
-      ## href atrribute pull
-      urls <- rvest::html_attr(xml2::xml_contents(day.node.set)[pos.hrefs],"href")
+      ## lists of urls
+      listed.urls <- xml2::xml_contents(pop.node.set) %>%
+        lapply(xml2::xml_contents) %>%
+        lapply(xml2::xml_contents) %>%
+        lapply(rvest::html_attr,"href")
+
       ## tidy urls
-      url.list <- c(url.list,paste("https://web.archive.org",urls,sep=""))
+      url.list <- c(url.list,paste("https://web.archive.org",unlist(listed.urls),sep=""))
 
     }
 
