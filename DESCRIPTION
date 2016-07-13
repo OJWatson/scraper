@@ -8,3 +8,4 @@ Maintainer: <oj.watson@hotmail.co.uk>
 Description: Growing database of scraping functions
 License: GPL2
 LazyData: TRUE
+RoxygenNote: 5.0.1
