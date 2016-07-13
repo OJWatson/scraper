@@ -5,7 +5,7 @@
 #'
 #' @name waities.package
 #'
-#' @import XML rvest xml2
+#' @import XML rvest xml2 dplyr
 #'
 #'
 NULL
