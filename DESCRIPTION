@@ -5,6 +5,9 @@ Version: 0.1
 Date: 2016-06-17
 Author: OJ Watson
 Maintainer: <oj.watson@hotmail.co.uk>
+Description: Growing database of scraping functions
+License: GPL2
+LazyData: TRUE
 Depends:
     R (>= 3.0.1),
 Imports:
@@ -12,8 +15,7 @@ Imports:
     xml2,
     rvest,
     magrittr,
-    pdftools
-Description: Growing database of scraping functions
-License: GPL2
-LazyData: TRUE
+    pdftools,
+    Rcpp (>= 0.12.0)
+LinkingTo: Rcpp
 RoxygenNote: 5.0.1
