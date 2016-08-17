@@ -1,5 +1,5 @@
 # scraper
-[![Build Status](https://travis-ci.org/OJWatson/waities.png?branch=master)](https://travis-ci.org/OJWatson/waities)
+[![Build Status](https://travis-ci.org/OJWatson/scraper.png?branch=master)](https://travis-ci.org/OJWatson/scraper)
 
 > Scraping package with growing functionality
 
