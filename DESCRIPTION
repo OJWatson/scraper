@@ -1,4 +1,4 @@
-Package: waities
+Package: scraper
 Type: Package
 Title: Scraping package with growing purposes
 Version: 0.1
@@ -11,7 +11,8 @@ Imports:
     XML,
     xml2,
     rvest,
-    magrittr
+    magrittr,
+    pdftools
 Description: Growing database of scraping functions
 License: GPL2
 LazyData: TRUE
