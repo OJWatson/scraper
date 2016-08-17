@@ -5,17 +5,15 @@
 
 ## What is this?
 
-The BBC food website is not receiving further funding, and is being archived with no easy way to search for recipes 
-etc. This package so far scrapes the recipe list, however as more scraping demands appear it seems sensible to store them 
-somewhere
+The BBC food website was not receiving further funding at one point, and was being archived with no easy way to search for recipes etc. This package so far scrapes the recipe list, however as more scraping demands appear it seemed sensible to store them somewhere
 
-## Installing *waities* devel
+## Installing *scraper* devel
 
 To install the development version from github (the package *devtools is required*):
 
 ```r
 library(devtools)
-install_github("OJWatson/waities")
+install_github("OJWatson/scraper")
 ```
 Note that on Windows, a toolkit ([Rtools](https://cran.r-project.org/bin/windows/Rtools/)) needs to be installed separately for *devtools* to work. 
 
@@ -27,4 +25,4 @@ library(waities)
 
 ## Asking a question
 
-- for bug reports, feature requests, contributions, use github's [issue system](https://github.com/OJWatson/waities/issues)
+- for bug reports, feature requests, contributions, use github's [issue system](https://github.com/OJWatson/scraper/issues)
