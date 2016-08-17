@@ -19,6 +19,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom stringr str_trim str_locate str_detect
 #' @importFrom qdap clean
+
 #' @importFrom pdftools pdf_text
 #'
 #' @export
@@ -96,8 +97,10 @@ for (i in 1:length(scraped.urls$urls)){
 
   tryCatch({
 
-    download.file(as.character(scraped.urls$urls[i]), paste(pdf.dir.dump,"/",row.names(scraped.urls)[i],".pdf",sep=""), mode = "wb")
-    txt <- pdftools::pdf_text(paste(pdf.dir.dump,"/",row.names(scraped.urls)[i],".pdf",sep=""))
+
+    download.file(as.character(scraped.urls$urls[i]), paste(row.names(scraped.urls)[i],".pdf",sep=""), mode = "wb")
+    txt <- pdftools::pdf_text(paste(row.names(scraped.urls)[i],".pdf",sep=""))
+
 
     text.present <- stringr::str_detect(txt,stringr::fixed(string))
     page.no <- which(text.present)
