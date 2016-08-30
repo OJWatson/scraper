@@ -16,6 +16,8 @@ Imports:
     rvest,
     magrittr,
     pdftools,
+    qdap,
+    stringr,
     Rcpp (>= 0.12.0)
 LinkingTo: Rcpp
 RoxygenNote: 5.0.1
