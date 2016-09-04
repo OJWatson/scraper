@@ -3,10 +3,10 @@
 #' \code{Recipe_Pull} takes the saved sitemap of the bccfood website and uses it to pull all the
 #' recipes from the website into a list of lists for futher use.
 #'
-#' @param sitemap url of sitemap. Defauly NULL but in theory could specify url of recipe site sitemap that uses
-#' recipe schema
-#' @param start Start of recipe urls in sitemap data
-#' @param end End of recipe urls in sitemap data
+#' @param sitemap.url URL of sitemap. Default = NULL which triggers reading a sitemap listed in sitemap.path. If sitemap.path is
+#' not NULL then this will be used in stead of sitemap.url
+#' @param sitemap.path Path of sitemap file. Default = NULL which triggers reading the saved bbc.co.uk/food/sitemap.xml data.
+#' @param failed Vector which is returned from \code{Recipe_Pull} which contains the positions of failed urls
 #'
 #' @return List of list of recipes
 #'
@@ -16,51 +16,86 @@
 #'
 #'
 
-Recipe_Pull <- function(sitemap=NULL,start=15,end=11141){
+Recipe_Pull <- function(sitemap.url=NULL,sitemap.path=NULL,failed=NULL){
 
+## Read in the source of the sitemap
+if(!is.null(sitemap.url)){
 
-if(is.null(sitemap)){
-  data(sitemap)
+  sitemap <- xml2::read_html(sitemap.url) %>% XML::xmlTreeParse()
+
+} else if (!is.null(sitemap.path)) {
+
+  sitemap <- XML::xmlTreeParse(sitemap.path) %>% XML::xmlTreeParse()
+
 } else {
-sitemap <- XML::xmlTreeParse(sitemap)
+
+  sitemap <- xml2::read_xml("inst/sitemap.xml") %>% XML::xmlTreeParse()
+
 }
+
+## Convert to List for easy manipulation
 l <- XML::xmlToList(sitemap)
-l <- unlist(l)
 
-max2 <- 0
-for (i in 1:length(l)){
-  max2 <- max(max2,length(strsplit(l[i],"/")$url.loc))
+## Clarify the start occcurence of "recipes" in the urls
+sruc <- lapply(l,strsplit,"/") %>%
+  lapply(function(x){return(is.element("recipes",x[[1]]))}) %>%
+  unlist() %>%
+  which.max()
+
+sruc.length <- length(strsplit(l[[sruc]],"/")[[1]])
+
+## Check that this is simply www.x.x.x/recipes and if so redo
+if(sruc.length==which(strsplit(l[[sruc]],"/")[[1]]=="recipes")){
+
+  start <- lapply(l[-sruc],strsplit,"/") %>%
+    lapply(function(x){return(is.element("recipes",x[[1]]))}) %>%
+    unlist() %>%
+    which.max() + 1
+
+} else {
+
+  start <- sruc
+
 }
 
-spl.mat <- matrix(data =0,nrow = length(l),ncol = max2)
+## find last recipe position
+end <- lapply(l,strsplit,"/") %>%
+  lapply(function(x){return(is.element("recipes",x[[1]]))}) %>%
+  unlist() %>%
+  sum() - start
 
-for (i in 1:length(l)){
-  spl.mat[i,1:length(strsplit(l[i],"/")$url.loc)] <- strsplit(l[i],"/")$url.loc
-}
-
-start <- 15
-
+## subset list that contains the urls
 r <- l[start:end]
+pos <- 1:length(r)
 
+## create collection vector for http errors
 ht.errors <- c()
 
-
+## preallocate html list
 html.list <- list()
-
 length(html.list) <- length(r)
-for (i in 1:length(r)){
-  tryCatch({
-html.list[[i]] <- xml2::read_html(r[i])
-  }, error=function(e){ht.errors <- c(ht.errors,i)})
-message(paste("html pull ",i,sep=""))
+
+## try reading from the recipe urls and catch those that fail for repeating after
+## if failed is specified only consider those urls
+if(!is.null(failed)){
+  pos <- failed
 }
 
+for (i in pos){
+
+  tryCatch({
+    html.list[[i]] <- xml2::read_html(r[i]$url.loc)
+  }, error=function(e){ht.errors <- c(ht.errors,i)})
+  message(paste("html pull ",i,sep=""))
+
+}
+
+## preallocate list of recipes
 recipe.list <- list()
 length(recipe.list) = length(html.list)
 
-for (h in 1:length(html.list)){
+for (h in pos){
 ls <- list()
-
 
 message(paste("scrape ",h,sep=""))
 tryCatch({
