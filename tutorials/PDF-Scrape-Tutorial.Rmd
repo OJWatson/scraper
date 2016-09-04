@@ -1,0 +1,291 @@
+---
+title: "PDF Scrape Tutorial"
+author: "OJ Watson"
+date: "04 September 2016"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+---
+
+## Problem Description
+
+A time may arise when you find yourself having to scrape information from a list
+of PDFs, which sadly are not formatted for search. An example of this can be seen
+from looking at the the WHO website malaria country profiles:
+
+<http://www.who.int/malaria/publications/country-profiles/en/>
+
+This page shows a list of links to PDFs that describe country malaria profiles for
+2015. These PDFs contain a variety of information, but for example let's try and
+focus on the *"Reported confrmed cases:"*. 
+
+Before we start we need to create a function to identify all the link urls. In doing 
+this and then scraping from the pdfs we will requite a number of very useful R
+packages:
+
+## R packages required
+
+```{r Packages, include=TRUE, message = FALSE, warning = FALSE,results='hide'}
+# Install and load required packages
+
+# Package for easy web scraping with R
+install.packages("rvest",repos="http://cloud.r-project.org/")
+# Simplifies R code for passing data munging forward
+install.packages("magrittr",repos="http://cloud.r-project.org/")
+# Useful package for string searching and manipulating
+install.packages("stringr",repos="http://cloud.r-project.org/")
+# Useful package for handling strange character types and escaping chracters
+install.packages("qdap",repos="http://cloud.r-project.org/")
+# Package for handling PDFs
+install.packages("pdftools",repos="http://cloud.r-project.org/")
+
+```
+
+## URL List from a CSS Selector
+
+Below is an example function that will use a provided minimal css selector to 
+extract a vector of all the URLs that we want. There are various ways to find out 
+what css selector you need such as using your web browser developer tools, however
+a particularly neat solution is using Andrew and Kyle's brilliant SelectorGadget
+<http://selectorgadget.com/> that has a fantastic chrome extension. Have a look 
+at their site and see how it can be used to identify that the css selector *".a_z a"*
+can be used to identify all the PDF links.  
+
+
+```{r URL List from a CSS Selector, include=TRUE}
+
+# Provide the url with the PDF links in and the css element
+url <- "http://www.who.int/globalchange/resources/country-profiles/en/"
+css <- ".a_z a"
+
+# function to find urls of links in provided url given css
+URL_Lists_From_CSS_Selector <- function(url,css){
+  
+  ## pull the xml files from the urls
+  xml.list <- xml2::read_html(url)
+  
+  ## draw down the node set from the css selector
+  node.set <- rvest::html_nodes(xml.list,css)
+  
+  ## isolate the position in contents that will corresponds to the url
+  ## This is important as websites often provide internal url links rather than
+  ## that will not provide the complete url
+  link.names <- xml2::xml_contents(node.set) 
+  link.names <- rvest::html_text(link.names)
+  
+  ## fetch all the urls attached to the link attribute "href"
+  internal.urls <- rvest::html_attr(node.set,"href")
+  
+  ## store these as the function output
+  urls <- internal.urls
+  
+  ## find urls that are full urls:
+  full.boolean <- unlist(lapply(strsplit(internal.urls,"/"),
+                                function(x){return(x[[1]]=="http:")}))
+  
+  ## split the truly internal url references and the full url
+  internal.split <- unlist(strsplit(internal.urls[which.min(full.boolean)],"/"))
+  full.split <- unlist(strsplit(url,"/"))
+  
+  ## find the first match after the first case which will be a blank match
+  first.common <- min(tail(match(internal.split,full.split),
+                           length(match(internal.split,full.split))-1),na.rm = T)
+  
+  ## create the prefix url
+  prefix.url <- unlist(strsplit(url,full.split[first.common]))[1]
+  
+  ## vector of ending urls
+  end.urls <- unlist(strsplit(internal.urls[!full.boolean],
+                              full.split[first.common]))[seq(2,length(internal.urls[!full.boolean])*2,2)]
+  
+  ## tidy the output of the truly internal urls
+  urls[which(!full.boolean)] <- paste(prefix.url,full.split[first.common],end.urls,sep="")
+  
+  ## turn into df
+  df <- data.frame(urls,row.names = link.names)
+  
+  return(df)
+  
+}
+
+```
+
+## Download PDFs and select text based on a common string
+
+If we run the earlier function we will now have a vector of urls that represent
+the desired PDFs. We now want to download and extract the number that appears
+after *"Reported confrmed cases:"*. We will want to carry this out suppressing
+errors as it is quite common for HTTP errors to occur, or PDF to text conversions
+that will throw errors but that will not affect what we are interested in. We will 
+then want to identify where our text belongs and then grab the following words.
+
+Before looking at this, it is worth mentioning that scraping is ususally quite ugly...  
+
+```{r Download PDF and scrape, include=TRUE, message = FALSE, warning = FALSE,results='hide'}
+
+## grab pdf urls using earlier function
+scraped.urls <- URL_Lists_From_CSS_Selector(url,css)
+
+## Provide the string we are interested in, a location where we store the PDFs
+## and what number of words that we are interested in after the string. 
+
+# String that our figure appears after
+string = "Reported confirmed cases:"
+# Where we store the PDFs
+pdf.dir.dump = "C:/Users/Oliver/Desktop/pdfdump/"
+# Here we only want the first word, but in theory you may want the 1st, 3rd, 4th etc.
+words=1
+# If we were storing more values then it would be nice to label our results
+col.names = c("Cases")
+# How many characters after teh string should we search for the value we want
+search.length = 200
+# Boolean that will make sense later, but is set to save time on future scrapes
+downloaded = FALSE
+
+## create matrix for storing the result
+mat <- matrix(nrow=length(scraped.urls$urls),ncol = length(words))
+## vector that let's us know which pdfs didn't download or failed in some way
+no.pdf <- rep(FALSE,length(scraped.urls$urls))
+
+for (i in 1:length(scraped.urls$urls)){
+  
+  tryCatch({
+    
+    # Here we allow this to skip download the pdf if we have already run this once
+    if(!downloaded){
+      
+      # Download the pdf using the scraped.urls
+      download.file(url = as.character(scraped.urls$urls[i]),
+                    destfile = paste(pdf.dir.dump,row.names(scraped.urls)[i],".pdf",sep=""),
+                    mode = "wb")
+    }
+    
+    # Simply turn the entire PDF into text (ugly but works)
+    txt <- pdftools::pdf_text(paste(pdf.dir.dump,row.names(scraped.urls)[i],".pdf",sep=""))
+    
+    # Only continue if our string of interest is present
+    text.present <- stringr::str_detect(txt,stringr::fixed(string))
+    # Find which page it's on, again to save time
+    page.no <- which(text.present)
+    
+    if(length(page.no)>0){
+      
+      # Find which positions the string of interest spans between
+      pos <- stringr::str_locate(txt[page.no],stringr::fixed(string))
+      
+      # Split the entire text page
+      tc <- strsplit(txt, "")[[page.no]]
+      
+      # Create one string that represents the search.length number of characters after the
+      # string of interest
+      string.search <-   paste(tc[(pos[2]+1):(pos[2]+search.length)],sep="",collapse = "")
+      
+      # Trim white space and clean and split based on white space, and then return which 
+      #position of words we are interested. Here just the first
+      mat[i,] <- unlist(strsplit(stringr::str_trim(qdap::clean(string.search))," "))[words]
+    }
+    
+    # Report where this has failed so we can investigate after
+  }, error=function(e){no.pdf[i] <- TRUE})
+  
+}
+
+# Collate everything and name it
+df <- data.frame(mat,row.names = row.names(scraped.urls))
+names(df) <- col.names
+
+```
+
+## Executing our function
+
+If we wrap everything above into a function - for this look at the scraper 
+package within which this tutorial is also placed:
+
+<https://github.com/OJWatson/scraper>  
+
+```{r Execute our function, include=TRUE, message = FALSE, warning = FALSE,results='hide'}
+
+library(devtools)
+install_github("OJWatson/scraper")
+
+t1 <- scraper::URL_PDF_Text_Pull(url = "http://www.who.int/malaria/publications/country-profiles/en/",
+                       string = "Reported confirmed cases:",
+                       pdf.dir.dump = "C:/Users/Oliver/Desktop/pdfdump/",
+                       words=1,
+                       col.names = c("Cases"),
+                       downloaded = FALSE)
+```
+
+## Post processing
+
+As we can see, the scrape has picked up the thin space that is used in these PDFs
+as a thousand seperator. We can also see that some PDFs have failed, as although
+the PDF exists, subtley different text is used. As such we will look at the NA
+PDFs and see what the alternatives
+
+```{r errors, include=TRUE, message = FALSE, warning = FALSE,}
+# number of NAs
+t1$Cases[1:3]
+```
+
+If we open the 2nd pdf manually we can see that the first NA is due to a different string, so we can rerun it with the alternative string.  
+
+```{r Alternative String, include=TRUE, message = FALSE, warning = FALSE,results='hide'}
+t2 <- scraper::URL_PDF_Text_Pull(url = "http://www.who.int/malaria/publications/country-profiles/en/",
+                       string = "Total confirmed cases, 2014:",
+                       pdf.dir.dump = "C:/Users/Oliver/Desktop/pdfdump/",
+                       words=1,
+                       col.names = c("Cases"),
+                       downloaded = TRUE)
+
+# collate these
+t3 <- t1
+levels(t3$Cases) <- c(levels(t3$Cases),levels(t2$Cases))
+t3$Cases[is.na(t1$Cases)] <- factor(t2$Cases[is.na(t1$Cases)])
+
+# we can now see this has no NAs
+sum(is.na(t3$Cases))
+```
+
+We will then have to do some manual formatting to remove the thin space.  
+
+```{r formatting, include=TRUE, message = FALSE, warning = FALSE,results='hide'}
+# Remove the unicode for the thin space
+t4 <- gsub(pattern = "<U+2009>",replacement = "",x=t3$Cases)
+
+# This is almost certainly not the best way to handle this, so please if someone
+# knows an alternative then let me know.
+
+strsplit(t4[1],"")
+
+thin.space <- strsplit(t4[1],"")[[1]][3]
+# remove thin space and convert to numeric
+t5 <- as.numeric(gsub(pattern=thin.space,replacement="",t4))
+
+# Bring back to the original returned results
+Result <- t1
+Result$Cases <- t5
+```
+
+## Summary and further thoughts
+
+We can see that using css and a variety of R packages that we can extract the 
+information we want, although it quite messy. It is also worth noting that this
+is just what I have found possible from what I have discovered in R in the past 
+few weeks, and for example have found sources for alternative tools.For example,
+<http://tabula.technology/> is a tool for liberating data tables locked inside PDF 
+files, and has a client for R:
+
+<https://github.com/ropenscilabs/tabulizer>
+
+So perhaps the second half of this could be improved, however the first half shows
+a neat way that rvest and css selectors can be very useful. Have a look at some of
+the other functions in [scraper](https://github.com/OJWatson/scraper), for some 
+inspiration and I hope that these can give perahps better indications of what could
+be achieved. 
+
+---
+
+
