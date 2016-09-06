@@ -67,6 +67,7 @@ h6 {
 }
 </style>
 
+<link href="data:text/css;charset=utf-8,body%20%7B%0Afont%2Dfamily%3A%20Optima%2CSegoe%2C%22Segoe%20UI%22%2CCandara%2CCalibri%2CArial%2Csans%2Dserif%20%21important%3B%0Aline%2Dheight%3A%201%2E7%20%21important%3B%0Afont%2Dsize%3A%2016px%20%21important%3B%0Acolor%3A%20%23515153%20%21important%3B%20%7D%0Ah1%2C%20h2%20%7B%0Afont%2Dfamily%3A%20%22Libre%20Baskerville%22%2C%20serif%20%21important%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%234A6A83%3B%0Afont%2Dfamily%3A%20Optima%2CSegoe%2C%22Segoe%20UI%22%2CCandara%2CCalibri%2CArial%2Csans%2Dserif%20%21important%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%2383accd%3B%0A%7D" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -324,6 +325,7 @@ t3$Cases[is.na(t1$Cases)] &lt;- factor(t2$Cases[is.na(t1$Cases)])
 
 # we can now see this has no NAs
 sum(is.na(t3$Cases))</code></pre>
+<pre><code>## [1] 0</code></pre>
 <p>We will then have to do some manual formatting to remove the thin space.</p>
 <pre class="r"><code># Remove the unicode for the thin space
 t4 &lt;- gsub(pattern = &quot;&lt;U+2009&gt;&quot;,replacement = &quot;&quot;,x=t3$Cases)
@@ -331,15 +333,26 @@ t4 &lt;- gsub(pattern = &quot;&lt;U+2009&gt;&quot;,replacement = &quot;&quot;,x=
 # This is almost certainly not the best way to handle this, so please if someone
 # knows an alternative then let me know.
 
-strsplit(t4[1],&quot;&quot;)
-
-thin.space &lt;- strsplit(t4[1],&quot;&quot;)[[1]][3]
+strsplit(t4[1],&quot;&quot;)</code></pre>
+<pre><code>## [[1]]
+## [1] &quot;6&quot; &quot;1&quot; &quot;&lt;U+2009&gt;&quot; &quot;3&quot; &quot;6&quot; &quot;2&quot;</code></pre>
+<pre class="r"><code>thin.space &lt;- strsplit(t4[1],&quot;&quot;)[[1]][3]
 # remove thin space and convert to numeric
 t5 &lt;- as.numeric(gsub(pattern=thin.space,replacement=&quot;&quot;,t4))
 
 # Bring back to the original returned results
 Result &lt;- t1
-Result$Cases &lt;- t5</code></pre>
+Result$Cases &lt;- t5
+
+# Et voila
+head(Result)</code></pre>
+<pre><code>##               Cases
+## Afghanistan   61362
+## Algeria         266
+## Angola      2298979
+## Argentina         4
+## Azerbaijan        2
+## Bangladesh    10216</code></pre>
 </div>
 <div id="summary-and-further-thoughts" class="section level2">
 <h2>Summary and further thoughts</h2>
