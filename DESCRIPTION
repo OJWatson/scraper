@@ -10,7 +10,6 @@ License: GPL2
 LazyData: TRUE
 Depends:
     R (>= 3.0.1),
-    qdap,
 Imports:
     XML,
     xml2,
