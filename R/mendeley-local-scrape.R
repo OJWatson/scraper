@@ -95,6 +95,33 @@ Mendeley_DF <- function(path = "C:/Users/Oliver/AppData/Local/Mendeley Ltd/Mende
     return(path[1])
   }
 
+
+  notes_splitting <- function(notes,semantic){
+
+    sub.notes <- strsplit(notes,"]",fixed=T)
+
+    pos.methods <- which(unlist(lapply(sub.notes,FUN=grepl,pattern="METHODS",fixed=T)))
+    pos.findings <- which(unlist(lapply(sub.notes,FUN=grepl,pattern="FINDINGS",fixed=T)))
+    pos.data <- which(unlist(lapply(sub.notes,FUN=grepl,pattern="DATA",fixed=T)))
+    pos.ideas <- which(unlist(lapply(sub.notes,FUN=grepl,pattern="IDEAS",fixed=T)))
+
+    if(semantic=="METHODS"){
+      semantics <- gsub(pattern = "METHODS[<br/>",replacement = "",sub.notes[[1]][pos.methods],fixed = T)
+    } else if (semantic=="FINDINGS"){
+      semantics <- gsub(pattern = "FINDINGS[<br/>",replacement = "",sub.notes[[1]][pos.findings],fixed = T)
+    } else if (semantic=="DATA"){
+      semantics <- gsub(pattern = "DATA[<br/>",replacement = "",sub.notes[[1]][pos.data],fixed = T)
+    } else {
+      semantics <- gsub(pattern = "IDEAS[<br/>",replacement = "",sub.notes[[1]][pos.ideas],fixed = T)
+    }
+
+    if(length(semantics)==0) {
+      semantics <- ""
+    }
+
+    return(semantics)
+
+  }
   #### Main Function ####
 
   # Previous exploratory functions if interest at further tables is needed
@@ -154,7 +181,10 @@ Mendeley_DF <- function(path = "C:/Users/Oliver/AppData/Local/Mendeley Ltd/Mende
                     "Paths"=unlist(sapply(Documents$id,FUN = paths_collate)),
                     stringsAsFactors = FALSE)
 
-
+  res$Methods <- unlist(lapply(res$Notes,notes_splitting,semantic="METHODS"))
+  res$Findings <- unlist(lapply(res$Notes,notes_splitting,semantic="FINDINGS"))
+  res$Data <- unlist(lapply(res$Notes,notes_splitting,semantic="DATA"))
+  res$Ideas <- unlist(lapply(res$Notes,notes_splitting,semantic="IDEAS"))
 
   return(res)
 
