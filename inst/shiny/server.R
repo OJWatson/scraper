@@ -12,7 +12,7 @@ function(input, output) {
   mdf <- scraper::Mendeley_DF()
 
   ## UTF-8 hack to deal with incorrect character formatting
-  mdf[c(2:3,5:10)] <- lapply(mdf[c(2:3,5:10)],function(x){
+  mdf[c(2:3,5:15)] <- lapply(mdf[c(2:3,5:15)],function(x){
     Encoding(x)<-"UTF-8"
     return(x)})
 
