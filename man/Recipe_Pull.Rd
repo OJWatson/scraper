@@ -4,15 +4,15 @@
 \alias{Recipe_Pull}
 \title{BBC Food recipes scrape}
 \usage{
-Recipe_Pull(sitemap = NULL, start = 15, end = 11141)
+Recipe_Pull(sitemap.url = NULL, sitemap.path = NULL, failed = NULL)
 }
 \arguments{
-\item{sitemap}{url of sitemap. Defauly NULL but in theory could specify url of recipe site sitemap that uses
-recipe schema}
+\item{sitemap.url}{URL of sitemap. Default = NULL which triggers reading a sitemap listed in sitemap.path. If sitemap.path is
+not NULL then this will be used in stead of sitemap.url}
 
-\item{start}{Start of recipe urls in sitemap data}
+\item{sitemap.path}{Path of sitemap file. Default = NULL which triggers reading the saved bbc.co.uk/food/sitemap.xml data.}
 
-\item{end}{End of recipe urls in sitemap data}
+\item{failed}{Vector which is returned from \code{Recipe_Pull} which contains the positions of failed urls}
 }
 \value{
 List of list of recipes

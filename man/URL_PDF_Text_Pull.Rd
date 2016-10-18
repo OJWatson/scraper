@@ -7,7 +7,8 @@
 
   URL_PDF_Text_Pull(url = "http://www.who.int/globalchange/resources/country-profiles/en/",
   css = ".a_z a", string = "Population (2013)", pdf.dir.dump,
-  col.names = c("Number", "Size"), search.length = 200, words = c(2, 3))
+  downloaded = FALSE, col.names = c("Number", "Size"),
+  search.length = 200, words = c(2, 3))
 }
 \arguments{
 \item{url}{Url containing links to pdfs}
@@ -18,6 +19,9 @@
 
 \item{pdf.dir.dump}{Directory path where pdfs are downloaded to}
 
+\item{downloaded}{Boolean determining if \code{URL_PDF_Text_Pull} has already
+been called and thus there is no need to redownload pdfs. Default = FALSE}
+
 \item{col.names}{vector of length 2 for data frame result names}
 
 \item{search.length}{Integer giving the length of the pdf text to search after the occurence of string}
@@ -26,6 +30,8 @@
 number of words is greater than the actual number of words that appear after the search string search length}
 }
 \value{
+list of dataframes of scraped information
+
 list of dataframes of scraped information
 }
 \description{
